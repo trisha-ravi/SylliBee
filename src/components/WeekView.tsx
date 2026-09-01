@@ -4,7 +4,7 @@ import type { KindFilter } from '../types';
 import { HH, H0, HN } from '../data/constants';
 import { useCourseMap } from '../context/CourseContext';
 import { useCalendarDates } from '../context/CalendarDateContext';
-import { blockStyle, dueChipStyle } from '../utils/eventStyles';
+import { blockStyle, dueChipStyle, completeClass } from '../utils/eventStyles';
 import { groupDueEventsBySlot, gridEndHour } from '../utils/eventLayout';
 import { eventDayIndex } from '../utils/dates';
 import { showOnWeekGrid, withScheduleRange } from '../utils/eventSchedule';
@@ -17,10 +17,11 @@ interface WeekViewProps {
   visibleEvents: CalendarEvent[];
   kind: KindFilter;
   hidden: Record<string, boolean>;
+  done: Record<string, boolean>;
   onOpen: (e: CalendarEvent) => void;
 }
 
-export function WeekView({ events, visibleEvents, kind, hidden, onOpen }: WeekViewProps) {
+export function WeekView({ events, visibleEvents, kind, hidden, done, onOpen }: WeekViewProps) {
   const cmap = useCourseMap();
   const { days, weekStart } = useCalendarDates();
   const now = new Date();
@@ -183,11 +184,12 @@ export function WeekView({ events, visibleEvents, kind, hidden, onOpen }: WeekVi
                   <button
                     key={e.id}
                     type="button"
-                    className="event-block"
+                    className={`event-block${completeClass(e, done)}`}
                     onClick={() => onOpen(e)}
                     style={blockStyle(e, cmap, grid)}
                   >
                     <span
+                      className="event-complete-label"
                       style={{
                         display: 'block',
                         fontWeight: 700,
@@ -202,7 +204,7 @@ export function WeekView({ events, visibleEvents, kind, hidden, onOpen }: WeekVi
                       {e.k === 'study' ? '✨ ' : ''}{e.t}
                     </span>
                     {height >= 52 && e.k !== 'exam' && (
-                      <span style={{ fontSize: 10, opacity: 0.8, marginTop: 1, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span className="event-complete-label" style={{ fontSize: 10, opacity: 0.8, marginTop: 1, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {e.k === 'class' ? e.loc : e.sub}
                       </span>
                     )}
@@ -244,9 +246,10 @@ export function WeekView({ events, visibleEvents, kind, hidden, onOpen }: WeekVi
                         type="button"
                         onClick={() => onOpen(e)}
                         title={`${e.t} · due ${e.due}`}
+                        className={completeClass(e, done).trim() || undefined}
                         style={dueChipStyle(e, cmap)}
                       >
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                        <span className="event-complete-label" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
                           {e.t}
                         </span>
                       </button>

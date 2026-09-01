@@ -7,6 +7,7 @@ import { getCourse } from '../utils/courses';
 import { dueToHours, shortTime } from '../utils/time';
 import { eventDayIndex, eventDateInWeek, isEventInWeek, startOfDay } from '../utils/dates';
 import { upNextMeta } from '../utils/eventLabels';
+import { isEventComplete } from '../utils/eventStyles';
 import {
   beezyRailRecommendation,
   todayStats,
@@ -559,11 +560,13 @@ export function RightRail({ events, hidden, done, rail, added, onSetRail, onTogg
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {g.items.map((e) => {
                     const c = getCourse(cmap, e.c);
+                    const itemDone = isEventComplete(e, done);
                     return (
                       <button
                         key={e.id}
                         type="button"
                         onClick={() => onOpen(e)}
+                        className={`up-next-item${itemDone ? ' event-complete' : ''}`}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -583,10 +586,10 @@ export function RightRail({ events, hidden, done, rail, added, onSetRail, onTogg
                         </span>
                         <span style={{ width: 8, height: 8, borderRadius: 3, flexShrink: 0, background: e.k === 'exam' ? '#D95542' : c.hex, boxShadow: `0 0 9px rgba(${c.rgb},.6)` }} />
                         <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                          <span style={{ display: 'block', fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span className="up-next-title event-complete-label" style={{ display: 'block', fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {(e.k === 'study' ? '✨ ' : e.k === 'exam' ? '🔴 ' : '') + e.t}
                           </span>
-                          <span style={{ display: 'block', fontSize: 10.5, color: 'rgba(45,49,56,.5)', marginTop: 1 }}>
+                          <span className="up-next-meta event-complete-label" style={{ display: 'block', fontSize: 10.5, color: 'rgba(45,49,56,.5)', marginTop: 1 }}>
                             {upNextMeta(e, c.code)}
                           </span>
                         </span>

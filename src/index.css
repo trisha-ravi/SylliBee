@@ -907,8 +907,31 @@ body {
   line-height: 1.35;
 }
 
-.rail-todo-item--done .rail-todo-title {
+.rail-todo-item--done .rail-todo-title,
+.rail-todo-item--done .rail-todo-meta {
   text-decoration: line-through;
+  text-decoration-color: rgba(35, 38, 43, 0.4);
+}
+
+.event-complete {
+  opacity: 0.58;
+}
+
+.event-complete .event-complete-label {
+  text-decoration: line-through;
+  text-decoration-color: rgba(35, 38, 43, 0.45);
+}
+
+.up-next-item.event-complete .up-next-title,
+.up-next-item.event-complete .up-next-meta {
+  text-decoration: line-through;
+  text-decoration-color: rgba(35, 38, 43, 0.4);
+}
+
+.detail-title--complete {
+  text-decoration: line-through;
+  text-decoration-color: rgba(35, 38, 43, 0.45);
+  opacity: 0.72;
 }
 
 .rail-todo-meta {

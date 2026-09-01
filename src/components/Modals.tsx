@@ -120,7 +120,7 @@ export function DetailModal({ detail, isComplete, onClose, onAddStudy, onToggleC
             }}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 19.5, fontWeight: 600, letterSpacing: '-.4px', lineHeight: 1.2 }}>{detail.title}</div>
+            <div className={isComplete ? 'detail-title--complete' : undefined} style={{ fontSize: 19.5, fontWeight: 600, letterSpacing: '-.4px', lineHeight: 1.2 }}>{detail.title}</div>
             <div style={{ fontSize: 12.5, color: 'rgba(45,49,56,.6)', marginTop: 4 }}>{detail.course}</div>
           </div>
           <button type="button" className="btn-glass" onClick={onClose} style={closeBtn}>✕</button>

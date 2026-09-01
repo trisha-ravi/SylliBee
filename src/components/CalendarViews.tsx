@@ -6,6 +6,7 @@ import { useCalendarDates } from '../context/CalendarDateContext';
 import { getCourse } from '../utils/courses';
 import { buildMonthGrid, eventDayIndex, eventOnDate, eventInMonth } from '../utils/dates';
 import { eventMetaLine, monthEventLabel, monthEventSort } from '../utils/eventLabels';
+import { completeClass } from '../utils/eventStyles';
 import { fmt, range, eventStartHour } from '../utils/time';
 import { eventScheduleRange } from '../utils/eventSchedule';
 
@@ -41,11 +42,12 @@ function agendaSubtitle(e: CalendarEvent, code: string): string {
 interface MonthViewProps {
   events: CalendarEvent[];
   hidden: Record<string, boolean>;
+  done: Record<string, boolean>;
   onOpen: (e: CalendarEvent) => void;
   monthStart: Date;
 }
 
-export function MonthView({ events, hidden, onOpen, monthStart }: MonthViewProps) {
+export function MonthView({ events, hidden, done, onOpen, monthStart }: MonthViewProps) {
   const cmap = useCourseMap();
   const cells = buildMonthGrid(monthStart);
   const monthEvents = useMemo(
@@ -86,7 +88,7 @@ export function MonthView({ events, hidden, onOpen, monthStart }: MonthViewProps
                 <button
                   key={e.id}
                   type="button"
-                  className={`month-view-event${exam ? ' month-view-event--exam' : ''}${study ? ' month-view-event--study' : ''}`}
+                  className={`month-view-event${exam ? ' month-view-event--exam' : ''}${study ? ' month-view-event--study' : ''}${completeClass(e, done)}`}
                   onClick={() => onOpen(e)}
                   style={{
                     ['--course-rgb' as string]: c.rgb,
@@ -95,7 +97,7 @@ export function MonthView({ events, hidden, onOpen, monthStart }: MonthViewProps
                   title={e.t}
                 >
                   <span className="month-view-event-icon">{ICON[e.k]}</span>
-                  <span className="month-view-event-label">{monthEventLabel(e, c.code)}</span>
+                  <span className="month-view-event-label event-complete-label">{monthEventLabel(e, c.code)}</span>
                 </button>
                 );
               })}
@@ -114,10 +116,11 @@ export function MonthView({ events, hidden, onOpen, monthStart }: MonthViewProps
 
 interface AgendaViewProps {
   events: CalendarEvent[];
+  done: Record<string, boolean>;
   onOpen: (e: CalendarEvent) => void;
 }
 
-export function AgendaView({ events, onOpen }: AgendaViewProps) {
+export function AgendaView({ events, done, onOpen }: AgendaViewProps) {
   const cmap = useCourseMap();
   const { days, weekStart } = useCalendarDates();
   const todayIdx = days.findIndex((d) => d.today);
@@ -203,7 +206,7 @@ export function AgendaView({ events, onOpen }: AgendaViewProps) {
                         <button
                           key={e.id}
                           type="button"
-                          className={`agenda-event${exam ? ' agenda-event--exam' : ''}${study ? ' agenda-event--study' : ''}`}
+                          className={`agenda-event${exam ? ' agenda-event--exam' : ''}${study ? ' agenda-event--study' : ''}${completeClass(e, done)}`}
                           onClick={() => onOpen(e)}
                           style={{
                             ['--course-rgb' as string]: c.rgb,
@@ -214,14 +217,14 @@ export function AgendaView({ events, onOpen }: AgendaViewProps) {
                           <div className="agenda-event-body">
                             <div className="agenda-event-top">
                               <span className="agenda-event-icon">{ICON[e.k] ?? '•'}</span>
-                              <span className="agenda-event-title">
+                              <span className="agenda-event-title event-complete-label">
                                 {study ? '✨ ' : ''}{e.t}
                               </span>
                               <span className={`agenda-event-kind${exam ? ' agenda-event-kind--exam' : ''}`}>
                                 {KIND_LABEL[e.k]}
                               </span>
                             </div>
-                            <div className="agenda-event-meta">{agendaSubtitle(e, c.code)}</div>
+                            <div className="agenda-event-meta event-complete-label">{agendaSubtitle(e, c.code)}</div>
                           </div>
                         </button>
                       );

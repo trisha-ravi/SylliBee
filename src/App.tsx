@@ -193,11 +193,12 @@ export default function App({ userId, userEmail, onSignOut }: AppProps) {
                 visibleEvents={cal.visibleEvents}
                 kind={cal.kind}
                 hidden={cal.hidden}
+                done={cal.done}
                 onOpen={cal.openEvent}
               />
             )}
-            {cal.view === 'Month' && <MonthView events={cal.visibleEvents} hidden={cal.hidden} onOpen={cal.openEvent} monthStart={cal.monthStart} />}
-            {cal.view === 'Agenda' && <AgendaView events={cal.visibleEvents} onOpen={cal.openEvent} />}
+            {cal.view === 'Month' && <MonthView events={cal.visibleEvents} hidden={cal.hidden} done={cal.done} onOpen={cal.openEvent} monthStart={cal.monthStart} />}
+            {cal.view === 'Agenda' && <AgendaView events={cal.visibleEvents} done={cal.done} onOpen={cal.openEvent} />}
             {cal.view === 'Semester' && (
               <SemesterView
                 events={cal.events}

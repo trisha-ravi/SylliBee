@@ -3,6 +3,14 @@ import type { CalendarEvent, Course } from '../types';
 import { CMAP, HH, H0 } from '../data/constants';
 import { getCourse } from './courses';
 
+export function isEventComplete(e: CalendarEvent, done: Record<string, boolean>): boolean {
+  return !!done[e.id] || !!e.done;
+}
+
+export function completeClass(e: CalendarEvent, done: Record<string, boolean>): string {
+  return isEventComplete(e, done) ? ' event-complete' : '';
+}
+
 export function dueChipStyle(e: CalendarEvent, cmap: Record<string, Course> = CMAP): CSSProperties {
   const c = getCourse(cmap, e.c);
   return {
