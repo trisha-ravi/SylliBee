@@ -1,9 +1,19 @@
+export function isJwtTimeError(err: unknown): boolean {
+  const msg = err && typeof err === 'object' && 'message' in err
+    ? String((err as { message?: string }).message ?? '')
+    : String(err ?? '');
+  return /jwt issued at future|token used before issued|iat.*future|clock skew/i.test(msg);
+}
+
 export function formatSupabaseError(err: unknown): string {
   if (!err || typeof err !== 'object') return 'Could not connect to Supabase';
 
   const e = err as { message?: string; code?: string; details?: string; hint?: string };
   const msg = e.message ?? 'Unknown Supabase error';
 
+  if (isJwtTimeError(err)) {
+    return 'Your device clock is out of sync with the server. Turn on automatic date & time, then sign out and sign in again.';
+  }
   if (e.code === 'PGRST205' || /could not find the table/i.test(msg)) {
     return 'Database tables are missing. Run supabase/setup.sql in the Supabase SQL Editor, then try again.';
   }

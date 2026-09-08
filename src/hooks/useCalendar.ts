@@ -9,8 +9,8 @@ import { isVisible } from '../utils/eventStyles';
 import { mergeCourseMaps, buildCourse, slugFromCourseCode, uniqueCourseId, courseColorFromHex } from '../utils/courses';
 import { parseCourseImport } from '../utils/parseCourseImport';
 import { eventDayIndex, eventDayLabel, addDays, addMonths, buildWeekDays, formatPeriodLabel, startOfMonth, startOfWeekMonday, startOfDay, toISODate, isRecurringEvent, mondayDayIndex, parseFlexibleDate, type DayDescriptor } from '../utils/dates';
-import { isSupabaseConfigured } from '../lib/supabase';
-import { formatSupabaseError } from '../lib/supabaseErrors';
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
+import { formatSupabaseError, isJwtTimeError } from '../lib/supabaseErrors';
 import { loadLocalCalendar, saveLocalCalendar, clearLocalCalendar } from '../services/localCalendarStore';
 import {
   deleteCourseInDb,
@@ -151,6 +151,13 @@ export function useCalendar(userId: string | null) {
         if (!cancelled) {
           setSyncOk(false);
           setSyncError(`${formatSupabaseError(err)} Could not load your calendar.`);
+          if (isJwtTimeError(err)) {
+            try {
+              await getSupabase().auth.signOut();
+            } catch {
+              /* ignore — user can still use Sign out */
+            }
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
