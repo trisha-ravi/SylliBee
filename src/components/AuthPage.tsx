@@ -1,11 +1,18 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { SylliBeeLockup } from './SylliBeeLogo';
 
 type AuthMode = 'signin' | 'signup';
 
-export function AuthPage() {
+interface AuthPageProps {
+  /** Lets the user browse offline when they choose not to sign in yet. */
+  onContinueOffline?: () => void;
+}
+
+export function AuthPage({ onContinueOffline }: AuthPageProps) {
   const auth = useAuth();
+  const canAuth = isSupabaseConfigured;
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +32,11 @@ export function AuthPage() {
     e.preventDefault();
     setError(null);
     setMessage(null);
+
+    if (!canAuth) {
+      setError('Sign-in is not configured yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart the app.');
+      return;
+    }
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
@@ -72,6 +84,18 @@ export function AuthPage() {
           />
         </div>
 
+        <p className="auth-footnote" style={{ marginTop: -4, marginBottom: 12 }}>
+          Sign in to load your saved courses and calendar. After sign-up, check your email if confirmation is required.
+        </p>
+
+        {!canAuth && (
+          <div className="auth-alert auth-alert--error" style={{ marginBottom: 14 }}>
+            Login isn’t connected yet. Add <code style={{ fontSize: 12 }}>VITE_SUPABASE_URL</code> and{' '}
+            <code style={{ fontSize: 12 }}>VITE_SUPABASE_ANON_KEY</code> to <code style={{ fontSize: 12 }}>.env</code> (or GitHub
+            Actions secrets), then restart.
+          </div>
+        )}
+
         <div className="auth-tabs">
           <button
             type="button"
@@ -98,7 +122,7 @@ export function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@school.edu"
-              disabled={submitting}
+              disabled={submitting || !canAuth}
             />
           </label>
           <label className="auth-field">
@@ -109,7 +133,7 @@ export function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              disabled={submitting}
+              disabled={submitting || !canAuth}
             />
           </label>
           {mode === 'signup' && (
@@ -121,7 +145,7 @@ export function AuthPage() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="Repeat password"
-                disabled={submitting}
+                disabled={submitting || !canAuth}
               />
             </label>
           )}
@@ -129,7 +153,7 @@ export function AuthPage() {
           {error && <div className="auth-alert auth-alert--error">{error}</div>}
           {message && <div className="auth-alert auth-alert--success">{message}</div>}
 
-          <button type="submit" className="auth-submit" disabled={submitting}>
+          <button type="submit" className="auth-submit" disabled={submitting || !canAuth}>
             {submitting ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
           </button>
         </form>
@@ -151,6 +175,14 @@ export function AuthPage() {
             </>
           )}
         </p>
+
+        {onContinueOffline && (
+          <p className="auth-footnote" style={{ marginTop: 10 }}>
+            <button type="button" className="auth-link" onClick={onContinueOffline}>
+              Continue without signing in
+            </button>
+          </p>
+        )}
       </div>
     </div>
   );

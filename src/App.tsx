@@ -26,9 +26,10 @@ interface AppProps {
   userId: string | null;
   userEmail?: string;
   onSignOut?: () => void;
+  onSignIn?: () => void;
 }
 
-export default function App({ userId, userEmail, onSignOut }: AppProps) {
+export default function App({ userId, userEmail, onSignOut, onSignIn }: AppProps) {
   const cal = useCalendar(userId);
 
   const monthLabel = cal.periodLabel;
@@ -154,6 +155,16 @@ export default function App({ userId, userEmail, onSignOut }: AppProps) {
                 style={{ height: 34, padding: '0 12px', borderRadius: 11, fontSize: 12.5, fontWeight: 550, cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Sign out
+              </button>
+            )}
+            {onSignIn && (
+              <button
+                type="button"
+                className="btn-glass-strong"
+                onClick={() => onSignIn()}
+                style={{ height: 34, padding: '0 12px', borderRadius: 11, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Sign in
               </button>
             )}
             <button type="button" className="btn-glass-strong" onClick={() => cal.setAddMenu(!cal.addMenu)} style={addBtn}>+ Add</button>

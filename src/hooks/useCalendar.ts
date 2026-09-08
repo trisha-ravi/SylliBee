@@ -11,7 +11,7 @@ import { parseCourseImport } from '../utils/parseCourseImport';
 import { eventDayIndex, eventDayLabel, addDays, addMonths, buildWeekDays, formatPeriodLabel, startOfMonth, startOfWeekMonday, startOfDay, toISODate, isRecurringEvent, mondayDayIndex, parseFlexibleDate, type DayDescriptor } from '../utils/dates';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { formatSupabaseError } from '../lib/supabaseErrors';
-import { loadLocalCalendar, saveLocalCalendar } from '../services/localCalendarStore';
+import { loadLocalCalendar, saveLocalCalendar, clearLocalCalendar } from '../services/localCalendarStore';
 import {
   deleteCourseInDb,
   deleteEventInDb,
@@ -120,8 +120,24 @@ export function useCalendar(userId: string | null) {
     setSyncOk(true);
     (async () => {
       try {
-        const snapshot = await initCalendarFromSupabase(userId);
+        let snapshot = await initCalendarFromSupabase(userId);
         if (cancelled || !snapshot) return;
+
+        const local = loadLocalCalendar();
+        if (local?.courses.length && snapshot.courses.length === 0 && snapshot.events.length === 0) {
+          const events = local.events.map((e) => ({
+            ...e,
+            done: local.done[e.id] || e.done,
+          }));
+          await replaceImportedCalendar(userId, local.courses, events, local.hidden);
+          if (local.view || local.kind) {
+            await savePreferences(userId, local.view, local.kind);
+          }
+          snapshot = await initCalendarFromSupabase(userId);
+          if (cancelled || !snapshot) return;
+          clearLocalCalendar();
+        }
+
         setDbCourses(snapshot.courses);
         setDbEvents(snapshot.events);
         setHidden(snapshot.hidden);

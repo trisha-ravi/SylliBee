@@ -1,13 +1,24 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthPage } from './components/AuthPage';
+import { SetupRequiredPage } from './components/SetupRequiredPage';
 import App from './App';
+import { isHostedDeploy } from './lib/authUrl';
+import { isGuestMode, setGuestMode } from './lib/guestMode';
 import { isSupabaseConfigured } from './lib/supabase';
 import './index.css';
 
 function Root() {
   const auth = useAuth();
+  const [guest, setGuest] = useState(() => isGuestMode());
+
+  useEffect(() => {
+    if (auth.user) {
+      setGuestMode(false);
+      setGuest(false);
+    }
+  }, [auth.user]);
 
   if (isSupabaseConfigured && auth.loading) {
     return (
@@ -29,8 +40,29 @@ function Root() {
     );
   }
 
-  if (isSupabaseConfigured && !auth.user) {
-    return <AuthPage />;
+  // Hosted deploy without secrets: login is impossible until Actions secrets are set.
+  if (!isSupabaseConfigured && isHostedDeploy()) {
+    return <SetupRequiredPage />;
+  }
+
+  const enterGuest = () => {
+    setGuestMode(true);
+    setGuest(true);
+  };
+
+  const exitGuestToLogin = () => {
+    setGuestMode(false);
+    setGuest(false);
+  };
+
+  // Prefer login whenever Supabase is configured and the user is signed out.
+  if (isSupabaseConfigured && !auth.user && !guest) {
+    return <AuthPage onContinueOffline={enterGuest} />;
+  }
+
+  // Local / offline without Supabase: still land on auth so login setup is visible.
+  if (!isSupabaseConfigured && !guest) {
+    return <AuthPage onContinueOffline={enterGuest} />;
   }
 
   return (
@@ -39,6 +71,7 @@ function Root() {
       userId={auth.user?.id ?? null}
       userEmail={auth.user?.email}
       onSignOut={auth.user ? () => auth.signOut() : undefined}
+      onSignIn={!auth.user ? exitGuestToLogin : undefined}
     />
   );
 }

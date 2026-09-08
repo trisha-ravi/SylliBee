@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
+import { getAuthRedirectUrl } from '../lib/authUrl';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
 import { formatSupabaseError } from '../lib/supabaseErrors';
 
@@ -68,6 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      options: {
+        emailRedirectTo: getAuthRedirectUrl(),
+      },
     });
     if (error) throw new Error(formatSupabaseError(error));
     const needsEmailConfirmation = !data.session && !!data.user;

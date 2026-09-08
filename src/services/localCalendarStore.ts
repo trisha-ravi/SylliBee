@@ -31,3 +31,11 @@ export function saveLocalCalendar(snapshot: LocalCalendarSnapshot): void {
     /* ignore quota / private mode */
   }
 }
+
+export function clearLocalCalendar(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
